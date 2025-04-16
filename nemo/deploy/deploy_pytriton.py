@@ -20,6 +20,8 @@ try:
 except Exception:
     use_pytriton = False
 
+from pytriton.model_config import DynamicBatcher
+
 from nemo.deploy.deploy_base import DeployBase
 
 
@@ -143,7 +145,10 @@ class DeployPyTriton(DeployBase):
                     infer_func=self.model.triton_infer_fn,
                     inputs=self.model.get_triton_input,
                     outputs=self.model.get_triton_output,
-                    config=ModelConfig(max_batch_size=self.max_batch_size),
+                    config=ModelConfig(
+                        max_batch_size=self.max_batch_size,
+                        batcher=DynamicBatcher(max_queue_delay_microseconds=50000),
+                    ),
                 )
         except Exception as e:
             self.triton = None
